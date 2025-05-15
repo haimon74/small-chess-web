@@ -82,6 +82,10 @@ const ChessGame: React.FC = () => {
       // In Diana Chess, pawns can only promote to rook, bishop, or knight
       return ['rook', 'bishop', 'knight'];
     }
+    if (settings.gameVariant === 'Los Alamos Chess') {
+      // In Los Alamos Chess, pawns can only promote to queen, rook, or knight (no bishop)
+      return ['queen', 'rook', 'knight'];
+    }
     // Default promotion options for other variants
     return ['queen', 'rook', 'bishop', 'knight'];
   };
@@ -242,7 +246,7 @@ const ChessGame: React.FC = () => {
                     title={type.charAt(0).toUpperCase() + type.slice(1)}
                   >
                     <img
-                      src={`/assets/images/${type}_${colorForImage}.svg`}
+                      src={`/assets/images/${colorForImage}_${type}.svg`}
                       alt={`${promotion.color} ${type}`}
                       style={{ width: 48, height: 48, display: 'block' }}
                     />
