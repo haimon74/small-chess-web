@@ -86,6 +86,14 @@ const ChessGame: React.FC = () => {
       // In Los Alamos Chess, pawns can only promote to queen, rook, or knight (no bishop)
       return ['queen', 'rook', 'knight'];
     }
+    if (settings.gameVariant === 'Mallett Chess') {
+      // In Mallett Chess, white: queen, rook, knight; black: queen, rook, bishop
+      if (color === 'white') {
+        return ['queen', 'rook', 'knight'];
+      } else {
+        return ['queen', 'rook', 'bishop'];
+      }
+    }
     // Default promotion options for other variants
     return ['queen', 'rook', 'bishop', 'knight'];
   };
