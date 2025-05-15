@@ -373,7 +373,7 @@ export const calculateValidMoves = (position: Position, gameState: GameState): P
   if (!piece) return [];
 
   const moves: Position[] = [];
-  const { row, col } = position;
+  // const { row, col } = position;
 
   switch (piece.type) {
     case 'pawn':
@@ -640,9 +640,16 @@ const canCastle = (position: Position, gameState: GameState, isKingside: boolean
   return true;
 };
 
-export const makeMove = (gameState: GameState, from: Position, to: Position, promotionType?: string): GameState => {
+export const makeMove = (
+  gameState: GameState,
+  from: Position,
+  to: Position,
+  promotionType?: string
+): GameState => {
   const newBoard = gameState.board.map(row => [...row]);
   const piece = newBoard[from.row][from.col]!;
+  const captured = newBoard[to.row][to.col];
+  console.log('makeMove called:', { from, to, piece, captured });
 
   // Handle castling
   if (piece.type === 'king' && Math.abs(to.col - from.col) === 2) {
@@ -655,15 +662,14 @@ export const makeMove = (gameState: GameState, from: Position, to: Position, pro
   }
 
   // Handle pawn promotion
-  if (
-    piece.type === 'pawn' &&
-    (to.row === 0 || to.row === newBoard.length - 1)
-  ) {
+  if (piece.type === 'pawn' && (to.row === 0 || to.row === newBoard.length - 1)) {
     newBoard[to.row][to.col] = { type: (promotionType || 'queen') as any, color: piece.color, hasMoved: true };
   } else {
     newBoard[to.row][to.col] = { ...piece, hasMoved: true };
   }
   newBoard[from.row][from.col] = null;
+
+  console.log('Board after move:', newBoard);
 
   const newGameState: GameState = {
     ...gameState,

@@ -1,4 +1,4 @@
-import { GameState, Position, Piece, PieceColor, PIECE_VALUES } from '../types/chess';
+import { GameState, Position, PieceColor, PIECE_VALUES } from '../types/chess';
 import { calculateValidMoves, makeMove, isKingInCheck, isCheckmate, isStalemate } from './chessLogic';
 
 // Rename the local Move interface to ComputerMove to avoid conflict

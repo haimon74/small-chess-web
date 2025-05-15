@@ -1,5 +1,5 @@
 import React from 'react';
-import { Piece, Position, BoardTheme, BoardSize } from '../types/chess';
+import { Piece, Position, BoardTheme } from '../types/chess';
 import { UNICODE_PIECES } from '../types/chess';
 import styles from './ChessBoard.module.css';
 
