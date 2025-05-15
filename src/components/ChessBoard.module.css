@@ -1,0 +1,164 @@
+.chessBoardContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px;
+  position: relative;
+}
+
+.chessBoard {
+  display: grid;
+  border: 2px solid #333;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.boardRow {
+  display: grid;
+  width: 100%;
+  height: 100%;
+}
+
+.square {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.square:hover {
+  filter: brightness(1.1);
+}
+
+/* Theme colors */
+.square.light.classic { background-color: #ffffff; }
+.square.dark.classic { background-color: #b0b0b0; }
+.square.light.brown { background-color: #e8c39e; }
+.square.dark.brown { background-color: #8b4513; }
+.square.light.green { background-color: #e8f5e9; }
+.square.dark.green { background-color: #2e7d32; }
+.square.light.navy { background-color: #ffffff; }
+.square.dark.navy { background-color: #1a237e; }
+
+.selected {
+  background-color: rgba(255, 255, 0, 0.3) !important;
+}
+
+.validMove::after {
+  content: '';
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  background-color: rgba(0, 255, 0, 0.4);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.validMove:hover::after {
+  background-color: rgba(0, 255, 0, 0.6);
+  transform: scale(1.1);
+  transition: all 0.2s ease;
+}
+
+.validMoveIndicator {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  background-color: rgba(0, 255, 0, 0.4);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.kingInCheck {
+  background-color: rgba(255, 0, 0, 0.3) !important;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { background-color: rgba(255, 0, 0, 0.3) !important; }
+  50% { background-color: rgba(255, 0, 0, 0.5) !important; }
+  100% { background-color: rgba(255, 0, 0, 0.3) !important; }
+}
+
+.piece {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  cursor: grab;
+  transition: transform 0.2s;
+}
+
+.pieceImage {
+  font-size: 40px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.whitePiece {
+  /* font-weight: bold; */
+}
+
+.piece:hover {
+  transform: scale(1.1);
+}
+
+.boardLabels {
+  display: flex;
+  position: absolute;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.files {
+  bottom: -25px;
+  left: 0;
+  width: 100%;
+  justify-content: center;
+}
+
+.label {
+  width: 70px;
+  text-align: center;
+}
+
+.ranks {
+  right: 35px;
+  top: 0;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.rank {
+  width: 20px;
+  text-align: center;
+  margin-left: 2px;
+}
+
+.checkWarning {
+  color: #ff0000;
+  font-weight: bold;
+  font-size: 1.2em;
+  margin: 10px 0;
+}
+
+.checkmate {
+  color: #ff0000;
+  font-weight: bold;
+  font-size: 1.5em;
+  margin: 10px 0;
+}
+
+.stalemate {
+  color: #666;
+  font-weight: bold;
+  font-size: 1.5em;
+  margin: 10px 0;
+} 
