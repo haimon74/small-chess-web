@@ -426,12 +426,13 @@ const calculatePawnMoves = (position: Position, gameState: GameState, moves: Pos
   const piece = gameState.board[row][col]!;
   const direction = piece.color === 'white' ? -1 : 1;
   const startRow = piece.color === 'white' ? gameState.board.length - 2 : 1;
+  const isSixBySix = gameState.board.length === 6 && gameState.board[0].length === 6;
 
   // Forward move
   if (isValidPosition(row + direction, col, gameState) && !gameState.board[row + direction][col]) {
     moves.push({ row: row + direction, col });
-    // Double move from starting position
-    if (row === startRow && isValidPosition(row + 2 * direction, col, gameState) && !gameState.board[row + 2 * direction][col]) {
+    // Double move from starting position (only if not 6x6)
+    if (!isSixBySix && row === startRow && isValidPosition(row + 2 * direction, col, gameState) && !gameState.board[row + 2 * direction][col]) {
       moves.push({ row: row + 2 * direction, col });
     }
   }
@@ -642,25 +643,28 @@ const canCastle = (position: Position, gameState: GameState, isKingside: boolean
 export const makeMove = (gameState: GameState, from: Position, to: Position): GameState => {
   const newBoard = gameState.board.map(row => [...row]);
   const piece = newBoard[from.row][from.col]!;
-  
+  const captured = newBoard[to.row][to.col];
+  console.log('makeMove called:', { from, to, piece, captured });
+
   // Handle castling
   if (piece.type === 'king' && Math.abs(to.col - from.col) === 2) {
     const isKingside = to.col > from.col;
-    const rookFromCol = isKingside ? 7 : 0;
+    const rookFromCol = isKingside ? newBoard[0].length - 1 : 0;
     const rookToCol = isKingside ? to.col - 1 : to.col + 1;
-    
     // Move rook
     newBoard[to.row][rookToCol] = newBoard[to.row][rookFromCol];
     newBoard[to.row][rookFromCol] = null;
   }
 
   // Handle pawn promotion
-  if (piece.type === 'pawn' && (to.row === 0 || to.row === 7)) {
+  if (piece.type === 'pawn' && (to.row === 0 || to.row === newBoard.length - 1)) {
     newBoard[to.row][to.col] = { type: 'queen', color: piece.color, hasMoved: true };
   } else {
     newBoard[to.row][to.col] = { ...piece, hasMoved: true };
   }
   newBoard[from.row][from.col] = null;
+
+  console.log('Board after move:', newBoard);
 
   const newGameState: GameState = {
     ...gameState,
