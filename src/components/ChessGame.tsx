@@ -14,11 +14,6 @@ const ChessGame: React.FC = () => {
   const [isComputerThinking, setIsComputerThinking] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [moveHistory, setMoveHistory] = useState<GameState[]>([]);
-  const [promotion, setPromotion] = useState<{
-    from: Position;
-    to: Position;
-    color: PieceColor;
-  } | null>(null);
   const [settings, setSettings] = useState<GameSettingsType>({
     playerColor: 'white',
     computerLevel: 2,
@@ -26,16 +21,11 @@ const ChessGame: React.FC = () => {
     boardSize: '6x6',
     gameVariant: 'Pawns Chess',
   });
-
-  useEffect(() => {
-    const handleEscKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && promotion) {
-        setPromotion(null);
-      }
-    };
-    window.addEventListener('keydown', handleEscKey);
-    return () => window.removeEventListener('keydown', handleEscKey);
-  }, [promotion]);
+  const [promotion, setPromotion] = useState<{
+    from: Position;
+    to: Position;
+    color: PieceColor;
+  } | null>(null);
 
   const startNewGame = (newSettings: GameSettingsType) => {
     setSettings(newSettings);
@@ -61,7 +51,11 @@ const ChessGame: React.FC = () => {
 
   const handleRevert = () => {
     if (!gameState || gameState.currentTurn !== settings.playerColor) return;
+    
+    // Need to go back at least 2 moves (player's move and computer's move)
     if (moveHistory.length < 3) return;
+    
+    // Remove the last two states (computer's move and player's move)
     const newHistory = moveHistory.slice(0, -2);
     setMoveHistory(newHistory);
     setGameState(newHistory[newHistory.length - 1]);
@@ -69,9 +63,12 @@ const ChessGame: React.FC = () => {
 
   const handlePieceClick = (position: Position) => {
     if (!gameState) return;
+
     const piece = gameState.board[position.row][position.col];
     if (!piece || piece.color !== gameState.currentTurn) return;
+
     const validMoves = calculateValidMoves(position, gameState);
+    console.log('Clicked piece at', position, 'Valid moves:', validMoves);
     setGameState({
       ...gameState,
       selectedPiece: position,
@@ -79,6 +76,17 @@ const ChessGame: React.FC = () => {
     });
   };
 
+  // Get available promotion pieces based on variant and color
+  const getAvailablePromotionPieces = (color: PieceColor): PromotionPiece[] => {
+    if (settings.gameVariant === 'Diana Chess') {
+      // In Diana Chess, pawns can only promote to rook, bishop, or knight
+      return ['rook', 'bishop', 'knight'];
+    }
+    // Default promotion options for other variants
+    return ['queen', 'rook', 'bishop', 'knight'];
+  };
+
+  // Handle promotion selection
   const handlePromotion = (pieceType: PromotionPiece) => {
     if (!promotion || !gameState) return;
     const newGameState = makeMove(gameState, promotion.from, promotion.to, pieceType);
@@ -104,16 +112,32 @@ const ChessGame: React.FC = () => {
     }
   };
 
+  // ESC key closes promotion modal
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && promotion) {
+        setPromotion(null);
+      }
+    };
+    window.addEventListener('keydown', handleEscKey);
+    return () => window.removeEventListener('keydown', handleEscKey);
+  }, [promotion]);
+
+  // Update handleSquareClick to trigger promotion modal
   const handleSquareClick = (position: Position) => {
     if (!gameState || !gameState.selectedPiece) return;
+
     const isValid = gameState.validMoves.some(
       move => move.row === position.row && move.col === position.col
     );
+
     if (isValid) {
       const piece = gameState.board[gameState.selectedPiece.row][gameState.selectedPiece.col];
+      // Check for pawn promotion
       if (
         piece?.type === 'pawn' &&
-        (position.row === 0 || position.row === gameState.board.length - 1)
+        ((piece.color === 'white' && position.row === 0) ||
+         (piece.color === 'black' && position.row === gameState.board.length - 1))
       ) {
         setPromotion({
           from: gameState.selectedPiece,
@@ -125,6 +149,8 @@ const ChessGame: React.FC = () => {
       const newGameState = makeMove(gameState, gameState.selectedPiece, position);
       setGameState(newGameState);
       setMoveHistory(prev => [...prev, newGameState]);
+
+      // Computer's turn
       if (newGameState.currentTurn !== settings.playerColor && !newGameState.isCheckmate) {
         setIsComputerThinking(true);
         setTimeout(() => {
@@ -148,6 +174,9 @@ const ChessGame: React.FC = () => {
   if (!gameState) {
     return <GameSettings onStart={startNewGame} />;
   }
+
+  console.log('Current selectedPiece:', gameState.selectedPiece);
+  console.log('Current validMoves:', gameState.validMoves);
 
   return (
     <div className={styles.chessGame}>
@@ -189,6 +218,7 @@ const ChessGame: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Promotion Modal */}
       {promotion && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
@@ -202,17 +232,17 @@ const ChessGame: React.FC = () => {
             </button>
             <h3>Choose Promotion</h3>
             <div style={{ display: 'flex', gap: 16, justifyContent: 'center', alignItems: 'center' }}>
-              {PROMOTION_PIECES.map((type) => {
+              {getAvailablePromotionPieces(promotion.color).map((type) => {
                 const colorForImage = promotion.color === 'white' ? 'light' : 'dark';
                 return (
                   <button
                     key={type}
-                    onClick={() => handlePromotion(type as PromotionPiece)}
+                    onClick={() => handlePromotion(type)}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     title={type.charAt(0).toUpperCase() + type.slice(1)}
                   >
                     <img
-                      src={`/assets/images/${colorForImage}_${type}.svg`}
+                      src={`/assets/images/${type}_${colorForImage}.svg`}
                       alt={`${promotion.color} ${type}`}
                       style={{ width: 48, height: 48, display: 'block' }}
                     />
